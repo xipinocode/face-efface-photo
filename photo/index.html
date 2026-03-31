@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'none';
+             script-src https://cdn.jsdelivr.net;
+             style-src 'unsafe-inline';
+             img-src data: blob:;
+             connect-src https://cdn.jsdelivr.net;
+             worker-src 'none';
+             form-action 'none';
+             base-uri 'none';">
+  <title>Face-Efface · Photo — XiPiNOCODE</title>
+  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+  <style>
+    :root {
+      --violet:   #200034;
+      --blue:     #1383ae;
+      --cyan:     #00a6d9;
+      --cyan-lt:  #b8e8f8;
+      --bg:       #0d0d18;
+      --surface:  #130920;
+      --surface2: #1c1134;
+      --border:   rgba(0, 166, 217, 0.18);
+      --border2:  rgba(0, 166, 217, 0.42);
+      --text:     #ffffff;
+      --dim:      rgba(184, 232, 248, 0.55);
+      --glow:     0 0 14px rgba(0, 166, 217, 0.35);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--bg);
+      display: flex;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    /* ── FENÊTRE PLEIN ÉCRAN ── */
+    #app {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      background: var(--bg);
+      overflow: hidden;
+    }
+
+    /* ── SIDEBAR ── */
+    aside {
+      width: 210px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    /* ── LOGO BLOC ── */
+    #logo-bloc {
+      padding: 16px 14px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo-text {
+      font-weight: 900;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      display: block;
+      white-space: nowrap;
+    }
+    .logo-xi   { color: #ffffff; }
+    .logo-pi   { color: var(--cyan); }
+    .logo-rest { color: var(--blue); }
+
+    /* Slogan sur 2 lignes, chaque ligne = largeur de XiPiNOCODE */
+    .logo-slogan {
+      display: flex;
+      flex-direction: column;
+      margin-top: 5px;
+      gap: 0px;
+    }
+    .logo-slogan span {
+      font-size: 0.5rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--cyan-lt);
+      opacity: 0.5;
+      line-height: 1.5;
+      white-space: nowrap;
+    }
+
+    /* Badge app name */
+    .app-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 10px;
+      background: #ffffff;
+      color: var(--violet);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 0.68rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      width: fit-content;
+    }
+    .app-badge svg { flex-shrink: 0; }
+
+    /* ── BLOCS SIDEBAR ── */
+    .sb-block {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sb-label {
+      font-size: 0.52rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--cyan);
+      margin-bottom: 2px;
+    }
+
+    /* ── MODES ── */
+    .mode-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      padding: 8px 9px;
+      border-radius: 7px;
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      transition: all 0.12s;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+    }
+    .mode-item:hover { background: rgba(0,166,217,0.07); border-color: var(--border); }
+    .mode-item.active {
+      background: rgba(0,166,217,0.1);
+      border-color: var(--border2);
+    }
+    .mode-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      border: 2px solid var(--dim);
+      flex-shrink: 0;
+      margin-top: 3px;
+      transition: all 0.12s;
+    }
+    .mode-item.active .mode-dot {
+      background: var(--cyan);
+      border-color: var(--cyan);
+      box-shadow: 0 0 6px rgba(0,166,217,0.6);
+    }
+    .mode-name {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.2;
+    }
+    .mode-desc {
+      font-size: 0.58rem;
+      color: var(--dim);
+      line-height: 1.5;
+      margin-top: 2px;
+    }
+
+    /* ── BOUTONS ── */
+    .btn {
+      width: 100%;
+      padding: 9px 10px;
+      border-radius: 7px;
+      font-weight: 700;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.12s;
+      color: var(--text);
+    }
+    .btn:active:not(:disabled) { transform: scale(0.96); }
+    .btn:disabled { opacity: 0.22; cursor: not-allowed; }
+
+    .btn-cyan {
+      background: var(--cyan);
+      color: var(--violet);
+      font-weight: 900;
+    }
+    .btn-cyan:hover:not(:disabled) { background: #10baed; box-shadow: var(--glow); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--cyan-lt);
+      border: 1.5px solid var(--border2);
+    }
+    .btn-outline:hover:not(:disabled) { border-color: var(--cyan); background: rgba(0,166,217,0.1); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--dim);
+      border: 1.5px solid var(--border);
+      font-size: 0.63rem;
+    }
+    .btn-ghost:hover:not(:disabled) { color: #fff; border-color: var(--border2); }
+
+    /* ── PANEL AJUSTEMENT ── */
+    #panel-adjust {
+      display: none;
+      flex-direction: column;
+      gap: 9px;
+      background: rgba(255,255,255,0.06);
+      border: 1.5px solid rgba(255,255,255,0.18);
+      border-radius: 8px;
+      padding: 11px 10px;
+    }
+    #panel-adjust.visible { display: flex; }
+
+    .adj-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .adj-label {
+      font-size: 0.63rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #ffffff;
+    }
+    #pixel-val {
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: #ffffff;
+    }
+    .zone-count {
+      font-size: 0.57rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--cyan);
+    }
+    .xn-range {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 3px;
+      border-radius: 2px;
+      background: rgba(255,255,255,0.15);
+      outline: none;
+      cursor: ew-resize;
+    }
+    .xn-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: #ffffff;
+      box-shadow: 0 0 7px rgba(255,255,255,0.4);
+      cursor: ew-resize;
+    }
+
+    /* ── BOUTON SUPPRIMER zone ── */
+    .face-box .del-btn {
+      position: absolute;
+      top: 2px; right: 2px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: rgba(255,95,87,0.85);
+      border: none;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      color: #fff;
+      font-weight: 900;
+      z-index: 20;
+      line-height: 1;
+    }
+    .face-box:hover .del-btn { display: flex; }
+
+    .sep { border: none; border-top: 1px solid var(--border); }
+
+    /* ── TOOLTIP i ── */
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 14px;
+      margin-top: auto;
+      border-top: 1px solid var(--border);
+    }
+    .info-tip {
+      position: relative;
+      width: 15px; height: 15px;
+      border-radius: 50%;
+      border: 1.5px solid var(--cyan-lt);
+      font-size: 0.55rem;
+      font-weight: 900;
+      color: var(--cyan-lt);
+      cursor: default;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.6;
+    }
+    .info-tip:hover { opacity: 1; }
+    .info-tip:hover .tip-box { display: block; }
+    .tip-box {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 0;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 10px 12px;
+      width: 185px;
+      font-size: 0.62rem;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.65;
+      z-index: 500;
+      pointer-events: none;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .tip-text {
+      font-size: 0.58rem;
+      color: var(--cyan-lt);
+      opacity: 0.6;
+      line-height: 1.4;
+    }
+
+    /* ── VIEWPORT ── */
+    #viewport {
+      flex: 1;
+      background: #07070f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    #viewport.drag-over { outline: 2px dashed var(--cyan); outline-offset: -4px; }
+
+    #canvas-wrap {
+      position: relative;
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    canvas {
+      display: block;
+      max-width: 100%;
+      max-height: 540px;
+      object-fit: contain;
+      cursor: crosshair;
+    }
+
+    #markers {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .face-box {
+      position: absolute;
+      border: 2px solid var(--blue);
+      background: rgba(19,131,174,0.05);
+      cursor: pointer;
+      pointer-events: auto;
+      z-index: 10;
+      overflow: hidden;
+    }
+    .face-box:hover { border-color: var(--cyan); }
+    .face-box.active {
+      border-color: var(--cyan);
+      background: rgba(0,166,217,0.09);
+      box-shadow: var(--glow);
+    }
+    .face-box .pcanvas {
+      width: 100%; height: 100%;
+      display: block;
+      image-rendering: pixelated;
+      pointer-events: none;
+    }
+
+    #sel-rect {
+      position: absolute;
+      border: 1.5px dashed var(--cyan);
+      background: rgba(0,166,217,0.06);
+      pointer-events: none;
+      display: none;
+      z-index: 50;
+    }
+
+    #empty-msg {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      pointer-events: none;
+    }
+    #empty-msg svg { width: 38px; opacity: 0.2; stroke: var(--blue); }
+    #empty-msg p {
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--cyan-lt);
+      opacity: 0.25;
+    }
+
+    #toast {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--cyan-lt);
+      padding: 6px 16px;
+      border-radius: 99px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      opacity: 0;
+      transition: opacity 0.18s, transform 0.18s;
+      z-index: 200;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ── SIDEBAR ── -->
+  <aside>
+
+    <!-- LOGO -->
+    <div id="logo-bloc">
+      <span class="logo-text">
+        <span class="logo-xi">Xi</span><span class="logo-pi">Pi</span><span class="logo-rest">NOCODE</span>
+      </span>
+      <div class="logo-slogan">
+        <span>Simplifier le compliqué</span>
+        <span>Rendre accessible l'austérité</span>
+      </div>
+      <div class="app-badge">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Face-Efface · Photo
+      </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="sb-block">
+
+      <!-- MANUEL -->
+      <div class="sb-label">Manuel</div>
+      <p class="mode-desc" style="font-size:0.6rem; color:var(--dim); line-height:1.65;">
+        Tracez un rectangle directement sur la photo. Le panneau de réglage apparaît automatiquement.
+      </p>
+
+      <!-- Panel ajustement (zones tracées ou sélectionnées) -->
+      <div id="panel-adjust">
+        <div class="zone-count" id="zone-label">1 zone active</div>
+        <div class="adj-row">
+          <span class="adj-label">Pixellisation</span>
+          <span id="pixel-val">20</span>
+        </div>
+        <input type="range" class="xn-range" id="pixel-size" min="4" max="80" value="20" oninput="onSlider()">
+        <button class="btn btn-cyan" onclick="applyBlur()">Appliquer</button>
+        <button class="btn btn-ghost" onclick="clearSelection()">Désélectionner tout</button>
+      </div>
+    </div>
+
+    <div class="sb-block">
+
+      <!-- DÉTECTER PAR IA -->
+      <div class="sb-label">IA · Détection</div>
+      <button id="btn-detect" class="btn btn-outline" disabled onclick="scanFaces()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Détecter les visages
+      </button>
+      <p style="font-size:0.58rem; color:var(--dim); line-height:1.65;">
+        Tous les visages sont pré-sélectionnés. Cliquez une boîte pour la désélectionner. La croix rouge la supprime. Ajustez l'intensité et appliquez en une fois ou zone par zone.
+      </p>
+    </div>
+
+    <div class="sb-block">
+
+      <!-- DÉTECTER + FLOUTER PAR IA -->
+      <div class="sb-label">IA · Floutage complet</div>
+      <button id="btn-auto" class="btn btn-cyan" disabled onclick="autoBlur()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Détecter et flouter tout
+      </button>
+      <p style="font-size:0.58rem; color:var(--dim); line-height:1.65;">
+        Un seul clic. L'IA détecte et floute immédiatement tous les visages.
+      </p>
+    </div>
+
+    <!-- FICHIER -->
+    <div class="sb-block">
+      <div class="sb-label">Fichier</div>
+      <input type="file" id="upload" accept="image/*" style="display:none">
+      <label for="upload" class="btn btn-outline" style="cursor:pointer;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Ouvrir une photo
+      </label>
+      <button id="btn-save" class="btn btn-outline" disabled onclick="saveImage()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Enregistrer
+      </button>
+    </div>
+
+    <!-- HISTORIQUE -->
+    <div class="sb-block">
+      <button id="btn-undo" class="btn btn-ghost" disabled onclick="undo()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+        Annuler  Ctrl+Z
+      </button>
+      <button class="btn btn-ghost" onclick="resetAll()">Tout effacer</button>
+    </div>
+
+    <!-- INFO CONFIDENTIALITÉ -->
+    <div class="info-row">
+      <div class="info-tip">
+        i
+        <div class="tip-box">
+          Votre photo est traitée directement dans votre navigateur, sur votre ordinateur.<br><br>
+          Elle n'est jamais envoyée sur internet ni stockée sur un serveur. Même quand l'application est en ligne, vos images restent chez vous.
+        </div>
+      </div>
+      <span class="tip-text">Vos photos restent<br>sur votre appareil</span>
+    </div>
+
+  </aside>
+
+  <!-- ── VIEWPORT ── -->
+  <section id="viewport">
+    <div id="canvas-wrap">
+      <div id="markers"></div>
+      <div id="sel-rect"></div>
+      <canvas id="canvas"></canvas>
+    </div>
+    <div id="empty-msg">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <circle cx="8.5" cy="8.5" r="1.5"/>
+        <polyline points="21 15 16 10 5 21"/>
+      </svg>
+      <p>Glissez une image ici</p>
+    </div>
+    <div id="toast"></div>
+  </section>
+
+</div>
+<script>
+  const canvas      = document.getElementById('canvas');
+  const ctx         = canvas.getContext('2d', { willReadFrequently: true });
+  const markersDiv  = document.getElementById('markers');
+  const selRect     = document.getElementById('sel-rect');
+  const upload      = document.getElementById('upload');
+  const btnSave     = document.getElementById('btn-save');
+  const btnUndo     = document.getElementById('btn-undo');
+  const panelAdjust = document.getElementById('panel-adjust');
+  const pixelSlider = document.getElementById('pixel-size');
+  const pixelVal    = document.getElementById('pixel-val');
+  const pixelSliderAuto = document.getElementById('pixel-size-auto');
+  const pixelValAuto    = document.getElementById('pixel-val-auto');
+  const emptyMsg    = document.getElementById('empty-msg');
+  const viewport    = document.getElementById('viewport');
+  const zoneLabel   = document.getElementById('zone-label');
+
+  let img      = null;
+  let history  = [];
+  let selected = [];
+  let drawing  = false;
+  let sx, sy, scx, scy;
+  let iaReady  = false;
+
+  // ── IA ──────────────────────────────────────────
+  async function loadIA() {
+    try {
+      await faceapi.nets.ssdMobilenetv1.loadFromUri(
+        'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/'
+      );
+      iaReady = true;
+      if (img) {
+        document.getElementById('btn-detect').disabled = false;
+        document.getElementById('btn-auto').disabled   = false;
+      }
+    } catch(e) {
+      showToast('IA indisponible — mode manuel uniquement');
+    }
+  }
+  loadIA();
+
+  // ── CHARGEMENT IMAGE ────────────────────────────
+  upload.onchange = e => loadFile(e.target.files[0]);
+
+  function loadFile(file) {
+    if (!file || !file.type.startsWith('image/') || file.type === 'image/svg+xml') return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const i = new Image();
+      i.onload = () => {
+        img = i;
+        canvas.width  = i.width;
+        canvas.height = i.height;
+        ctx.drawImage(i, 0, 0);
+        history = [canvas.toDataURL()];
+        clearMarkers();
+        selected = [];
+        updateUI();
+        emptyMsg.style.display = 'none';
+        btnSave.disabled = false;
+        if (iaReady) {
+          document.getElementById('btn-detect').disabled = false;
+          document.getElementById('btn-auto').disabled   = false;
+        }
+        showToast('Image chargée');
+      };
+      i.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ── DRAG & DROP ─────────────────────────────────
+  viewport.addEventListener('dragover', e => { e.preventDefault(); viewport.classList.add('drag-over'); });
+  viewport.addEventListener('dragleave', () => viewport.classList.remove('drag-over'));
+  viewport.addEventListener('drop', e => {
+    e.preventDefault();
+    viewport.classList.remove('drag-over');
+    loadFile(e.dataTransfer.files[0]);
+  });
+
+  // ── DÉTECTION IA — pré-sélectionne tout ─────────
+  async function scanFaces() {
+    if (!img || !iaReady) return;
+    const btn = document.getElementById('btn-detect');
+    btn.disabled = true;
+    btn.textContent = 'Analyse…';
+    const dets = await faceapi.detectAllFaces(canvas, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.4 }));
+    clearMarkers();
+    selected = [];
+    if (dets.length === 0) {
+      showToast('Aucun visage détecté — tracez manuellement');
+    } else {
+      // Tous pré-sélectionnés : l'utilisateur retire ceux qu'il ne veut pas
+      dets.forEach(d => {
+        const m = addMarker(d.box);
+        selected.push({ marker: m, box: d.box });
+        m.classList.add('active');
+      });
+      renderPreviews();
+      showToast(dets.length + ' visage(s) pré-sélectionné(s)');
+    }
+    btn.disabled = false;
+    btn.textContent = 'Détecter les visages';
+    updateUI();
+  }
+
+  // ── FLOUTAGE AUTO COMPLET (valeur forte fixe) ───
+  async function autoBlur() {
+    if (!img || !iaReady) return;
+    const btn = document.getElementById('btn-auto');
+    btn.disabled = true;
+    btn.textContent = 'En cours…';
+    const dets = await faceapi.detectAllFaces(canvas, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.4 }));
+    if (dets.length === 0) {
+      showToast('Aucun visage détecté');
+    } else {
+      dets.forEach(d => pixelate(d.box, 80)); // intensité max — visages méconnaissables
+      saveHistory();
+      showToast(dets.length + ' visage(s) flouté(s)');
+    }
+    btn.disabled = false;
+    btn.textContent = 'Détecter et flouter tout';
+  }
+
+  // ── MARQUEURS ───────────────────────────────────
+  function addMarker(box) {
+    const m  = document.createElement('div');
+    m.className = 'face-box';
+
+    const pc = document.createElement('canvas');
+    pc.className = 'pcanvas';
+    m.appendChild(pc);
+
+    // Bouton supprimer (croix rouge)
+    const del = document.createElement('button');
+    del.className = 'del-btn';
+    del.textContent = '✕';
+    del.addEventListener('click', e => {
+      e.stopPropagation();
+      const idx = selected.findIndex(z => z.marker === m);
+      if (idx > -1) selected.splice(idx, 1);
+      m.remove();
+      updateUI();
+    });
+    m.appendChild(del);
+
+    positionMarker(m, box);
+
+    m.addEventListener('click', e => {
+      e.stopPropagation();
+      const idx = selected.findIndex(z => z.marker === m);
+      if (idx > -1) {
+        selected.splice(idx, 1);
+        m.classList.remove('active');
+      } else {
+        selected.push({ marker: m, box });
+        m.classList.add('active');
+      }
+      updateUI();
+      renderPreviews();
+    });
+
+    markersDiv.appendChild(m);
+    return m;
+  }
+
+  function positionMarker(m, box) {
+    const r  = canvas.getBoundingClientRect();
+    const rx = r.width  / canvas.width;
+    const ry = r.height / canvas.height;
+    m.style.left   = (box.x * rx) + 'px';
+    m.style.top    = (box.y * ry) + 'px';
+    m.style.width  = (box.width  * rx) + 'px';
+    m.style.height = (box.height * ry) + 'px';
+  }
+
+  function clearMarkers() {
+    while (markersDiv.firstChild) markersDiv.removeChild(markersDiv.firstChild);
+  }
+
+  // ── SÉLECTION MANUELLE ──────────────────────────
+  canvas.addEventListener('mousedown', e => {
+    if (!img) return;
+    clearSelection();
+    drawing = true;
+    const c = getCoords(e);
+    sx = c.x; sy = c.y; scx = c.cx; scy = c.cy;
+    selRect.style.left = scx + 'px'; selRect.style.top = scy + 'px';
+    selRect.style.width = '0px';     selRect.style.height = '0px';
+    selRect.style.display = 'block';
+  });
+
+  window.addEventListener('mousemove', e => {
+    if (!drawing) return;
+    const c = getCoords(e);
+    const w = c.cx - scx, h = c.cy - scy;
+    selRect.style.width  = Math.abs(w) + 'px';
+    selRect.style.height = Math.abs(h) + 'px';
+    selRect.style.left   = (w > 0 ? scx : c.cx) + 'px';
+    selRect.style.top    = (h > 0 ? scy : c.cy) + 'px';
+  });
+
+  window.addEventListener('mouseup', e => {
+    if (!drawing) return;
+    drawing = false;
+    selRect.style.display = 'none';
+    const c = getCoords(e);
+    const w = Math.abs(c.x - sx), h = Math.abs(c.y - sy);
+    if (w > 10 && h > 10) {
+      const box = { x: Math.min(sx, c.x), y: Math.min(sy, c.y), width: w, height: h };
+      const m   = addMarker(box);
+      selected.push({ marker: m, box });
+      m.classList.add('active');
+      updateUI();
+      renderPreviews();
+    }
+  });
+
+  function getCoords(e) {
+    const r = canvas.getBoundingClientRect();
+    return {
+      x:  (e.clientX - r.left) * (canvas.width  / r.width),
+      y:  (e.clientY - r.top)  * (canvas.height / r.height),
+      cx: e.clientX - r.left,
+      cy: e.clientY - r.top
+    };
+  }
+
+  // ── APERÇU TEMPS RÉEL ───────────────────────────
+  function renderPreviews() {
+    const size = parseInt(pixelSlider.value);
+    selected.forEach(({ marker, box }) => {
+      const pc  = marker.querySelector('.pcanvas');
+      const pct = pc.getContext('2d');
+      const w   = Math.max(1, Math.floor(box.width));
+      const h   = Math.max(1, Math.floor(box.height));
+      const sw  = Math.max(1, Math.floor(w / size));
+      const sh  = Math.max(1, Math.floor(h / size));
+      pc.width = sw; pc.height = sh;
+      pct.drawImage(canvas, box.x, box.y, w, h, 0, 0, sw, sh);
+    });
+  }
+
+  function onSlider() {
+    pixelVal.textContent = pixelSlider.value;
+    if (selected.length) renderPreviews();
+  }
+
+  // ── APPLIQUER ────────────────────────────────────
+  function applyBlur() {
+    if (!selected.length) return;
+    const size = parseInt(pixelSlider.value);
+    selected.forEach(({ marker, box }) => { pixelate(box, size); marker.remove(); });
+    saveHistory();
+    selected = [];
+    updateUI();
+    showToast('Zones floutées');
+  }
+
+  function pixelate(box, size) {
+    let { x, y, width: w, height: h } = box;
+    x = Math.floor(x); y = Math.floor(y); w = Math.floor(w); h = Math.floor(h);
+    const id   = ctx.getImageData(x, y, w, h);
+    const data = id.data;
+    for (let v = 0; v < h; v += size) {
+      for (let u = 0; u < w; u += size) {
+        const i = (v * w + u) * 4;
+        const r = data[i], g = data[i+1], b = data[i+2];
+        for (let n = 0; n < size && (v+n) < h; n++) {
+          for (let m2 = 0; m2 < size && (u+m2) < w; m2++) {
+            const p = ((v+n)*w + (u+m2)) * 4;
+            data[p] = r; data[p+1] = g; data[p+2] = b;
+          }
+        }
+      }
+    }
+    ctx.putImageData(id, x, y);
+  }
+
+  // ── HISTORIQUE ──────────────────────────────────
+  function saveHistory() {
+    history.push(canvas.toDataURL());
+    if (history.length > 20) history.shift();
+    btnUndo.disabled = false;
+  }
+
+  function undo() {
+    if (history.length <= 1) return;
+    history.pop();
+    const i = new Image();
+    i.onload = () => {
+      ctx.drawImage(i, 0, 0);
+      clearMarkers(); selected = []; updateUI();
+      if (history.length <= 1) btnUndo.disabled = true;
+    };
+    i.src = history[history.length - 1];
+  }
+
+  // ── ENREGISTRER / RESET ─────────────────────────
+  function saveImage() {
+    const a = document.createElement('a');
+    a.download = 'face-efface-' + Date.now() + '.jpg';
+    a.href = canvas.toDataURL('image/jpeg', 0.92);
+    a.click();
+    showToast('Image enregistrée');
+  }
+
+  function resetAll() {
+    if (!img) return;
+    canvas.width = img.width; canvas.height = img.height;
+    ctx.drawImage(img, 0, 0);
+    history = [canvas.toDataURL()];
+    clearMarkers(); selected = []; updateUI();
+    showToast('Image réinitialisée');
+  }
+
+  // ── UTILITAIRES ─────────────────────────────────
+  function clearSelection() {
+    selected.forEach(z => {
+      z.marker.classList.remove('active');
+      const pc = z.marker.querySelector('.pcanvas');
+      if (pc) { pc.width = 0; pc.height = 0; }
+    });
+    selected = []; updateUI();
+  }
+
+  function updateUI() {
+    const n = selected.length;
+    if (n > 0) {
+      panelAdjust.classList.add('visible');
+      zoneLabel.textContent = n + ' zone' + (n > 1 ? 's' : '') + ' active' + (n > 1 ? 's' : '');
+    } else {
+      panelAdjust.classList.remove('visible');
+    }
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // ── RACCOURCIS ──────────────────────────────────
+  window.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z') undo();
+    if (e.key === 'Enter' && selected.length) applyBlur();
+    if (e.key === 'Escape') clearSelection();
+  });
+
+  // ── REDIMENSIONNEMENT ───────────────────────────
+  window.addEventListener('resize', () => {
+    if (!img) return;
+    const data = selected.map(z => ({ box: z.box }));
+    clearMarkers(); selected = [];
+    data.forEach(d => {
+      const m = addMarker(d.box);
+      selected.push({ marker: m, box: d.box });
+      m.classList.add('active');
+    });
+    renderPreviews(); updateUI();
+  });
+
+</script>
+</body>
+</html>
