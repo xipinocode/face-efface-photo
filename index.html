@@ -567,25 +567,23 @@
     #canvas-area {
       flex: 1;
       min-height: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       position: relative;
       overflow: hidden;
       background: #07070f;
     }
 
     #canvas-wrap {
-      position: relative;
-      max-width: 100%;
-      max-height: 100%;
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     canvas {
       display: block;
       max-width: 100%;
       max-height: 100%;
-      object-fit: contain;
       cursor: crosshair;
     }
 
