@@ -14,8 +14,10 @@
              base-uri 'none';">
   <title>Face-Efface · Photo — XiPiNOCODE</title>
   <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+  <script src="i18n.js"></script>
   <style>
     :root {
+      --sidebar-w: 20vw;
       --violet:   #200034;
       --blue:     #1383ae;
       --cyan:     #00a6d9;
@@ -52,7 +54,8 @@
 
     /* ── SIDEBAR ── */
     aside {
-      width: 210px;
+      width: var(--sidebar-w);
+      min-width: 190px;
       flex-shrink: 0;
       background: var(--surface);
       border-right: 1px solid var(--border);
@@ -685,31 +688,11 @@
       opacity: 0.25;
     }
 
-    #toast {
-      position: absolute;
-      bottom: 14px;
-      left: 50%;
-      transform: translateX(-50%) translateY(10px);
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      color: var(--cyan-lt);
-      padding: 6px 16px;
-      border-radius: 99px;
-      font-size: 0.65rem;
-      font-weight: 700;
-      opacity: 0;
-      transition: opacity 0.18s, transform 0.18s;
-      z-index: 200;
-      pointer-events: none;
-      white-space: nowrap;
-    }
-    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
     /* ── FOOTER ── */
     #footer {
       position: fixed;
       bottom: 0;
-      left: 210px;
+      left: var(--sidebar-w);
       right: 0;
       background: rgba(13,13,24,0.92);
       border-top: 1px solid var(--border);
@@ -753,7 +736,91 @@
     }
     .fbtn:hover { color: #fff; background: rgba(0,166,217,0.1); }
     .fbtn-pro { color: var(--cyan); }
+    .fbtn-tipeee { color: #f5a623; text-decoration: none; }
+    .fbtn-tipeee:hover { color: #ffc55a; background: rgba(245,166,35,0.1); }
     .fbtn-sep { color: var(--border2); font-size: 0.5rem; pointer-events: none; padding: 0; }
+
+    /* ── SÉLECTEUR LANGUE (sidebar) ── */
+    #lang-selector {
+      width: 100%;
+      padding: 10px 14px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    #lang-btn {
+      width: 100%;
+      background: rgba(0,166,217,0.08);
+      border: 1.5px solid var(--border2);
+      color: var(--cyan-lt);
+      font-size: 0.62rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      padding: 7px 10px;
+      border-radius: 7px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    #lang-btn:hover { background: rgba(0,166,217,0.15); border-color: var(--cyan); color: #fff; }
+    #lang-current-wrap { display: flex; align-items: center; gap: 5px; }
+    #lang-name {
+      font-size: 0.54rem;
+      font-weight: 600;
+      color: var(--dim);
+      text-transform: none;
+      letter-spacing: 0.02em;
+    }
+    #lang-menu {
+      display: none;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 4px;
+      margin-top: 6px;
+    }
+    #lang-menu.open { display: block; }
+    #lang-menu button {
+      display: block; width: 100%; background: none; border: none;
+      color: var(--dim); font-size: 0.65rem; font-weight: 700;
+      text-align: left; padding: 6px 10px; border-radius: 5px; cursor: pointer;
+      letter-spacing: 0.04em;
+    }
+    #lang-menu button:hover { background: rgba(0,166,217,0.12); color: #fff; }
+
+    /* ── BOUTON FLOTTANT TIPEEE ── */
+    #btn-tipeee-float {
+      position: fixed;
+      left: var(--sidebar-w);
+      right: 0;
+      bottom: 66px;
+      display: flex;
+      justify-content: center;
+      pointer-events: none;
+      z-index: 290;
+    }
+    #btn-tipeee-float a {
+      pointer-events: auto;
+      background: #f5a623;
+      color: #000;
+      font-weight: 900;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: 11px 32px;
+      border-radius: 10px;
+      text-align: center;
+      line-height: 1.55;
+      box-shadow: 0 4px 20px rgba(245,166,35,0.4);
+      transition: background 0.12s, box-shadow 0.12s;
+    }
+    #btn-tipeee-float a:hover {
+      background: #ffc55a;
+      box-shadow: 0 6px 28px rgba(245,166,35,0.6);
+    }
 
     /* ── MODALES ── */
     .modal-overlay {
@@ -814,28 +881,43 @@
     <!-- LOGO -->
     <div id="logo-bloc">
       <img id="logo-img" src="logo.png" alt="XiPiNOCODE">
-      <p class="badge-tagline">Œuvrant pour le respect de la vie privée.</p>
+    </div>
+
+    <!-- SÉLECTEUR LANGUE -->
+    <div id="lang-selector">
+      <button id="lang-btn" onclick="toggleLangMenu()">
+        <span id="lang-current-wrap"><span>🌐</span><span id="lang-current">FR</span></span>
+        <span id="lang-name">Français</span>
+      </button>
+      <div id="lang-menu">
+        <button onclick="setLang('fr')">🇫🇷 Français</button>
+        <button onclick="setLang('en')">🇬🇧 English</button>
+        <button onclick="setLang('es')">🇪🇸 Español</button>
+        <button onclick="setLang('it')">🇮🇹 Italiano</button>
+        <button onclick="setLang('de')">🇩🇪 Deutsch</button>
+        <button onclick="setLang('pt')">🇵🇹 Português</button>
+      </div>
     </div>
 
     <!-- DESCRIPTION DES 3 MODES -->
     <div class="sb-block">
-      <div class="sb-label">Les 3 modes</div>
-      <p style="font-size:0.72rem; color:rgba(184,232,248,0.85); line-height:1.75;">
+      <div class="sb-label" data-i18n="modes_title">Les 3 modes</div>
+      <p style="font-size:0.72rem; color:rgba(184,232,248,0.85); line-height:1.75;" data-i18n-html="modes_desc">
         <span style="color:#fff; font-weight:800;">Mode 1 — Manuel :</span> tracez un rectangle sur la photo pour définir une zone à flouter. <span style="color:var(--cyan);">Entrée</span> pour appliquer, <span style="color:var(--cyan);">Échap</span> pour désélectionner.<br><br>
         <span style="color:#fff; font-weight:800;">Mode 2 — IA Détection :</span> l'IA détecte les visages et pose les cadres. Cliquez sur ceux que vous voulez flouter pour les sélectionner, la croix rouge pour en supprimer un. Ajustez l'intensité puis appliquez.<br><br>
         <span style="color:var(--dim);">Les cadres <span style="color:#ff6a00; font-weight:800;">orange</span> sont sélectionnés (seront floutés), les cadres <span style="color:var(--cyan);">bleus</span> sont inactifs. Cliquez pour basculer.</span><br><br>
         <span style="color:var(--dim);">Dans les modes 1 et 2, une <span style="color:var(--cyan);">molette de réglage</span> apparaît au centre de la console dès qu'une zone est sélectionnée — elle permet d'ajuster l'intensité du floutage avant d'appliquer.</span><br><br>
         <span style="color:#fff; font-weight:800;">Mode 3 — IA Floutage complet :</span> l'IA détecte et floute tous les visages en un seul clic.
       </p>
-      <p style="font-size:0.58rem; color:var(--cyan); font-weight:800; letter-spacing:0.04em; margin-top:2px;">
+      <p style="font-size:0.58rem; color:var(--cyan); font-weight:800; letter-spacing:0.04em; margin-top:2px;" data-i18n="manual_always">
         ✦ Le mode Manuel est toujours actif
       </p>
     </div>
 
     <!-- CONSEILS -->
     <div class="conseils-block">
-      <div class="conseils-title">💡 Conseils d'organisation</div>
-      <p class="conseils-text">
+      <div class="conseils-title" data-i18n="tips_title">💡 Conseils d'organisation</div>
+      <p class="conseils-text" data-i18n-html="tips_text">
         Avant de commencer, créez deux dossiers sur votre ordinateur :<br><br>
         <strong style="color:#fff;">📁 Photos originales</strong> — vos photos telles qu'elles sont.<br>
         <strong style="color:#fff;">📁 Photos floutées</strong> — les photos une fois traitées.<br><br>
@@ -847,12 +929,12 @@
     <div class="info-row">
       <div class="info-tip">
         i
-        <div class="tip-box">
+        <div class="tip-box" data-i18n-html="privacy_tip">
           Votre photo est traitée directement dans votre navigateur, sur votre ordinateur.<br><br>
           Elle n'est jamais envoyée sur internet ni stockée sur un serveur. Même quand l'application est en ligne, vos images restent chez vous.
         </div>
       </div>
-      <span class="tip-text">Vos photos restent<br>sur votre appareil</span>
+      <span class="tip-text" data-i18n="privacy_label">Vos photos restent sur votre appareil</span>
     </div>
 
   </aside>
@@ -863,7 +945,7 @@
     <!-- HEADER PLEINE LARGEUR -->
     <div id="app-header">
       <span class="app-header-title">Face-Efface · Photo</span>
-      <span class="app-header-sub">Protection de la vie privée &nbsp;·&nbsp; Floutage automatique sur photo &nbsp;·&nbsp;</span>
+      <span class="app-header-sub" data-i18n="header_sub">Protection de la vie privée · Floutage automatique sur photo ·</span>
       <span class="app-header-by">Par XiPiNoCoDe</span>
     </div>
 
@@ -875,16 +957,16 @@
       <!-- GAUCHE : texte à gauche, icône à droite -->
       <div class="con-panel">
         <input type="file" id="upload" accept="image/*" style="display:none">
-        <label for="upload" class="cbtn cbtn-r1" style="cursor:pointer;" title="Ouvrir une photo">
-          <span class="clabel">Ouvrir une photo</span>
+        <label for="upload" class="cbtn cbtn-r1" style="cursor:pointer;" data-i18n-title="btn_open" title="Ouvrir une photo">
+          <span class="clabel" data-i18n="btn_open">Ouvrir une photo</span>
           <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
         </label>
-        <button id="btn-detect" class="cbtn cbtn-r2" disabled onclick="scanFaces()" title="Détection des visages automatique">
-          <span class="clabel"><span class="btn-label">Détection des visages automatique</span></span>
+        <button id="btn-detect" class="cbtn cbtn-r2" disabled onclick="scanFaces()" data-i18n-title="btn_detect" title="Détection des visages automatique">
+          <span class="clabel"><span class="btn-label" data-i18n="btn_detect">Détection des visages automatique</span></span>
           <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/></svg>
         </button>
-        <button id="btn-auto" class="cbtn cbtn-r3" disabled onclick="autoBlur()" title="Détection et floutage automatique">
-          <span class="clabel"><span class="btn-label">Détection et floutage automatique</span></span>
+        <button id="btn-auto" class="cbtn cbtn-r3" disabled onclick="autoBlur()" data-i18n-title="btn_auto" title="Détection et floutage automatique">
+          <span class="clabel"><span class="btn-label" data-i18n="btn_auto">Détection et floutage automatique</span></span>
           <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         </button>
       </div>
@@ -902,25 +984,25 @@
             <input type="range" class="xn-range" id="pixel-size" min="4" max="80" value="20" oninput="onSlider()">
           </div>
           <div class="adj-btns">
-            <button class="btn" onclick="applyBlur()">Appliquer</button>
-            <button class="btn" onclick="clearSelection()">✕ Désélectionner</button>
+            <button class="btn" onclick="applyBlur()" data-i18n="btn_apply">Appliquer</button>
+            <button class="btn" onclick="clearSelection()" data-i18n="btn_deselect">✕ Désélectionner</button>
           </div>
         </div>
       </div>
 
       <!-- DROITE : icône à gauche, texte à droite -->
       <div class="con-panel">
-        <button id="btn-undo" class="cbtn cbtn-r1" disabled onclick="undo()" title="Annuler (Ctrl+Z)">
+        <button id="btn-undo" class="cbtn cbtn-r1" disabled onclick="undo()" data-i18n-title="btn_undo_title" title="Annuler (Ctrl+Z)">
           <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
-          <span class="clabel">Annuler  Ctrl+Z</span>
+          <span class="clabel" data-i18n="btn_undo">Annuler  Ctrl+Z</span>
         </button>
-        <button class="cbtn cbtn-r2" onclick="resetAll()" title="Effacer">
+        <button class="cbtn cbtn-r2" onclick="resetAll()" data-i18n-title="btn_reset" title="Effacer">
           <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.11"/></svg>
-          <span class="clabel">Effacer</span>
+          <span class="clabel" data-i18n="btn_reset">Effacer</span>
         </button>
-        <button id="btn-save" class="cbtn cbtn-r3" disabled onclick="saveImage()" title="Enregistrer">
+        <button id="btn-save" class="cbtn cbtn-r3" disabled onclick="saveImage()" data-i18n-title="btn_save" title="Enregistrer">
           <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-          <span class="clabel">Enregistrer</span>
+          <span class="clabel" data-i18n="btn_save">Enregistrer</span>
         </button>
       </div>
 
@@ -942,30 +1024,26 @@
           <circle cx="8.5" cy="8.5" r="1.5"/>
           <polyline points="21 15 16 10 5 21"/>
         </svg>
-        <p>Glissez une image ici</p>
+        <p data-i18n="drop_here">Glissez une image ici</p>
       </div>
     </div>
 
-    <div id="toast"></div>
   </section>
 
 </div>
 
 <!-- ── FOOTER ── -->
 <div id="footer">
-  <div id="footer-pro">
-    <button class="fbtn fbtn-pro" onclick="openModal('modal-pro')">🔓 Soutenir le projet / Pro</button>
-  </div>
   <div id="footer-links">
-    <button class="fbtn" onclick="openModal('modal-mentions')">Mentions légales</button>
+    <button class="fbtn" onclick="openModal('modal-mentions')" data-i18n="footer_legal">Mentions légales</button>
     <span class="fbtn-sep">·</span>
-    <button class="fbtn" onclick="openModal('modal-rgpd')">Confidentialité & RGPD</button>
+    <button class="fbtn" onclick="openModal('modal-rgpd')" data-i18n="footer_privacy">Confidentialité & RGPD</button>
     <span class="fbtn-sep">·</span>
-    <button class="fbtn" onclick="openModal('modal-cgu')">CGU</button>
+    <button class="fbtn" onclick="openModal('modal-cgu')" data-i18n="footer_terms">CGU</button>
     <span class="fbtn-sep">·</span>
-    <button class="fbtn" onclick="openModal('modal-contact')">Contact</button>
+    <button class="fbtn" onclick="openModal('modal-contact')" data-i18n="footer_contact">Contact</button>
     <span class="fbtn-sep">·</span>
-    <button class="fbtn" onclick="openModal('modal-apropos')">À propos</button>
+    <button class="fbtn" onclick="openModal('modal-apropos')" data-i18n="footer_about">À propos</button>
   </div>
 </div>
 
@@ -1038,15 +1116,24 @@
 <div id="modal-pro" class="modal-overlay" onclick="closeModal(this)">
   <div class="modal-box" onclick="event.stopPropagation()">
     <button class="modal-close" onclick="closeModal(document.getElementById('modal-pro'))">✕</button>
-    <h2>❤️ Soutenir le projet</h2>
-    <p>Face-Efface · Photo est gratuit et le restera. Votre soutien permet de financer le développement des prochaines versions.</p>
-    <p><strong>Ce que vos dons permettront de développer :</strong></p>
-    <p>— <strong>Version Photo Pro</strong> — détection avancée (plaques, silhouettes), traitement par lot, export haute qualité<br>
-       — <strong>Version Vidéo</strong> — floutage automatique de visages sur vidéo, version publique et version Pro<br>
+    <h2 data-i18n="modal_dl_title">⬇️ Télécharger l'application</h2>
+    <p data-i18n-html="modal_dl_p1">La version <strong>installable Windows</strong> de Face-Efface · Photo est disponible pour les personnes qui soutiennent XiPiNOCODE sur Tipeee — à partir de <strong>2 €</strong>.</p>
+    <p style="margin-top:10px" data-i18n="modal_dl_p2">Linux et Android à venir. 100 % local, aucune donnée envoyée sur internet.</p>
+    <p style="margin-top:10px" data-i18n-html="modal_dl_p3"><strong>Ce que vos dons permettent de développer :</strong><br>
+       — Version Vidéo — floutage automatique sur vidéo<br>
        — Mises à jour régulières et nouveaux outils de protection de la vie privée</p>
-    <p>Tout reste 100 % local, aucune donnée envoyée sur internet.</p>
-    <p><strong>Soutenir le projet :</strong> <em>(lien cagnotte à venir)</em></p>
+    <a href="https://fr.tipeee.com/xipinocode/" target="_blank" rel="noopener"
+       style="display:block;margin-top:18px;padding:12px 0;background:var(--cyan);color:#000;font-weight:900;font-size:0.8rem;text-align:center;border-radius:8px;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;"
+       data-i18n="modal_dl_cta">
+      💛 Soutenir &amp; télécharger sur Tipeee
+    </a>
   </div>
+</div>
+
+<div id="btn-tipeee-float">
+  <a href="https://fr.tipeee.com/xipinocode/" target="_blank" rel="noopener" data-i18n-html="float_btn">
+    💛 Télécharger l'application<br>Soutenir sur Tipeee
+  </a>
 </div>
 
 <script>

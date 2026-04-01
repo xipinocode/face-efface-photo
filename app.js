@@ -38,7 +38,7 @@ async function loadIA() {
       document.getElementById('btn-auto').disabled   = false;
     }
   } catch(e) {
-    showToast('IA indisponible — mode manuel uniquement');
+    console.warn('IA indisponible');
   }
 }
 loadIA();
@@ -66,7 +66,6 @@ function loadFile(file) {
         document.getElementById('btn-detect').disabled = false;
         document.getElementById('btn-auto').disabled   = false;
       }
-      showToast('Image chargée');
     };
     i.src = ev.target.result;
   };
@@ -87,22 +86,17 @@ async function scanFaces() {
   if (!img || !iaReady) return;
   const btn = document.getElementById('btn-detect');
   btn.disabled = true;
-  setBtnLabel(btn, 'Analyse…');
+  setBtnLabel(btn, t('lbl_detecting'));
   const dets = await faceapi.detectAllFaces(canvas, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.4 }));
   clearMarkers();
   selected = [];
-  if (dets.length === 0) {
-    showToast('Aucun visage détecté — tracez manuellement');
-  } else {
-    dets.forEach(d => {
-      const m = addMarker(d.box);
-      selected.push({ marker: m, box: d.box });
-      m.classList.add('active');
-    });
-    showToast(dets.length + ' visage(s) détecté(s) — supprimez les indésirables puis appliquez');
-  }
+  dets.forEach(d => {
+    const m = addMarker(d.box);
+    selected.push({ marker: m, box: d.box });
+    m.classList.add('active');
+  });
   btn.disabled = false;
-  setBtnLabel(btn, 'Détection des visages automatique');
+  setBtnLabel(btn, t('lbl_detect_def'));
   updateUI();
 }
 
@@ -111,20 +105,15 @@ async function autoBlur() {
   if (!img || !iaReady) return;
   const btn = document.getElementById('btn-auto');
   btn.disabled = true;
-  setBtnLabel(btn, 'En cours…');
+  setBtnLabel(btn, t('lbl_blurring'));
   const dets = await faceapi.detectAllFaces(canvas, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.4 }));
-  if (dets.length === 0) {
-    showToast('Aucun visage détecté');
-  } else {
-    dets.forEach(d => {
-      const size = Math.max(6, Math.min(80, Math.round(Math.min(d.box.width, d.box.height) * 0.20)));
-      pixelate(d.box, size);
-    });
-    saveHistory();
-    showToast(dets.length + ' visage(s) flouté(s)');
-  }
+  dets.forEach(d => {
+    const size = Math.max(6, Math.min(80, Math.round(Math.min(d.box.width, d.box.height) * 0.20)));
+    pixelate(d.box, size);
+  });
+  if (dets.length > 0) saveHistory();
   btn.disabled = false;
-  setBtnLabel(btn, 'Détection et floutage automatique');
+  setBtnLabel(btn, t('lbl_auto_def'));
 }
 
 // ── MARQUEURS ───────────────────────────────────
@@ -259,7 +248,6 @@ function applyBlur() {
   saveHistory();
   selected = [];
   updateUI();
-  showToast('Zones floutées');
 }
 
 function pixelate(box, size) {
@@ -314,14 +302,12 @@ async function saveImage() {
       data: bytes,
       defaultName
     });
-    if (saved) showToast('Image enregistrée');
   } else {
     // Version web : téléchargement navigateur
     const a = document.createElement('a');
     a.download = 'face-efface-' + Date.now() + '.jpg';
     a.href = canvas.toDataURL('image/jpeg', 0.92);
     a.click();
-    showToast('Image enregistrée');
   }
 }
 
@@ -331,7 +317,6 @@ function resetAll() {
   ctx.drawImage(img, 0, 0);
   history = [canvas.toDataURL()];
   clearMarkers(); selected = []; updateUI();
-  showToast('Image réinitialisée');
 }
 
 // ── UTILITAIRES ─────────────────────────────────
@@ -349,18 +334,10 @@ function updateUI() {
   const blockAdjust = document.getElementById('block-adjust');
   if (n > 0) {
     blockAdjust.style.display = 'flex';
-    zoneLabel.textContent = n + ' zone' + (n > 1 ? 's' : '') + ' active' + (n > 1 ? 's' : '');
+    zoneLabel.textContent = n + ' ' + t(n > 1 ? 'zone_p' : 'zone_s');
   } else {
     blockAdjust.style.display = 'none';
   }
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.classList.remove('show'), 2500);
 }
 
 // ── RACCOURCIS ──────────────────────────────────
