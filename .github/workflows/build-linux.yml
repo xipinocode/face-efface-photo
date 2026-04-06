@@ -6,6 +6,9 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-linux:
     runs-on: ubuntu-22.04
@@ -25,7 +28,9 @@ jobs:
             libssl-dev \
             libglib2.0-dev \
             libsoup-3.0-dev \
-            libjavascriptcoregtk-4.1-dev
+            libjavascriptcoregtk-4.1-dev \
+            squashfs-tools \
+            libfuse2
 
       - name: Installer Node.js
         uses: actions/setup-node@v4
@@ -46,7 +51,7 @@ jobs:
 
       - name: Build Tauri Linux
         working-directory: photo
-        run: npx tauri build --target x86_64-unknown-linux-gnu
+        run: npx tauri build
         env:
           TAURI_SIGNING_PRIVATE_KEY: ""
 
@@ -55,12 +60,14 @@ jobs:
         with:
           name: face-efface-photo-linux-appimage
           path: photo/src-tauri/target/release/bundle/appimage/*.AppImage
+          if-no-files-found: warn
 
       - name: Upload .deb
         uses: actions/upload-artifact@v4
         with:
           name: face-efface-photo-linux-deb
           path: photo/src-tauri/target/release/bundle/deb/*.deb
+          if-no-files-found: warn
 
       - name: Créer Release GitHub (si tag)
         if: startsWith(github.ref, 'refs/tags/')
