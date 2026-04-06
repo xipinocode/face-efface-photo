@@ -1,0 +1,29 @@
+{
+  "name": "photo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xipilom/face-efface-photo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/xipilom/face-efface-photo/issues"
+  },
+  "homepage": "https://github.com/xipilom/face-efface-photo#readme",
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.10.1",
+    "sharp": "^0.34.5"
+  },
+  "dependencies": {
+    "@tauri-apps/plugin-dialog": "^2.6.0",
+    "@tauri-apps/plugin-fs": "^2.4.5"
+  }
+}

@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg1"
+   width="1005.5208"
+   height="381.19351"
+   viewBox="0 0 1005.5208 381.19351"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath3">
+      <rect
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.6584;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+         id="rect3"
+         width="830.93091"
+         height="537.38324"
+         x="280.53455"
+         y="88.122292" />
+    </clipPath>
+    <linearGradient id="grad-panel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#0e2a42"/>
+      <stop offset="50%"  stop-color="#0a1f31"/>
+      <stop offset="100%" stop-color="#071520"/>
+    </linearGradient>
+  </defs>
+  <g
+     id="g1"
+     transform="translate(-162.6953,-177.17166)">
+    <g
+       id="g6">
+      <path
+         style="fill:#0b2941;fill-opacity:1;fill-rule:evenodd;stroke:#00a6d9;stroke-width:1.292;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+         d="M 457.73544,177.87002 H 873.18011 V 442.80929 L 806.83687,557.71915 H 526.14699 l -67.30443,-116.5747 z"
+         id="path5" />
+      
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:semi-expanded;font-size:30.9814px;line-height:31.0677px;font-family:'AniMe Vision - MB_EN';-inkscape-font-specification:'AniMe Vision - MB_EN Semi-Expanded';text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:rgba(184,232,248,0.7);fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.7304;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+         x="687.28583"
+         y="463.19769"
+         id="text2"
+         transform="scale(0.97218179,1.0286142)"><tspan
+           id="tspan2"
+           x="687.28583"
+           y="463.19769"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:30.9814px;line-height:31.0677px;font-family:'Franklin Gothic Medium';-inkscape-font-specification:'Franklin Gothic Medium, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;stroke-width:1.7304">Protection de la vie privée</tspan><tspan
+           x="687.28583"
+           y="495.98456"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:30.9814px;line-height:31.0677px;font-family:'Franklin Gothic Medium';-inkscape-font-specification:'Franklin Gothic Medium, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;stroke-width:1.7304"
+           id="tspan3">Floutage automatique</tspan><tspan
+           x="691.15851"
+           y="528.77142"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:30.9814px;line-height:31.0677px;font-family:'Franklin Gothic Medium';-inkscape-font-specification:'Franklin Gothic Medium, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;stroke-width:1.7304"
+           id="tspan4">sur photo </tspan></text>
+    </g>
+    <path
+       style="opacity:1;fill:url(#grad-panel);fill-opacity:1;fill-rule:evenodd;stroke:#00a6d9;stroke-width:1.6317;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       id="rect5"
+       width="290.72034"
+       height="87.3936"
+       x="163.52402"
+       y="178.04688"
+       d="m 243.59375,178.04687 h 210.6506 v 87.39361 H 163.52402 v -7.32387 a 80.069733,80.069733 135 0 1 80.06973,-80.06974 z"
+       transform="matrix(1.0000881,0,0,0.96877103,-0.02721047,5.5472652)" />
+    <rect
+       style="opacity:1;fill:url(#grad-panel);fill-opacity:1;fill-rule:evenodd;stroke:#00a6d9;stroke-width:1.60609;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       id="rect5-1"
+       width="290.74594"
+       height="84.664391"
+       x="163.51122"
+       y="266.96194" />
+    <path
+       style="fill:url(#grad-panel);fill-opacity:1;fill-rule:evenodd;stroke:#00a6d9;stroke-width:1.6317;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       id="rect5-2"
+       width="290.72034"
+       height="87.3936"
+       x="163.52402"
+       y="353.30179"
+       d="m 163.52402,353.30179 h 290.72033 v 87.3936 H 250.91762 a 87.3936,87.3936 45 0 1 -87.3936,-87.3936 z"
+       transform="matrix(1.0000881,0,0,0.96877103,-0.02721047,13.621438)" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:29.3333px;line-height:28.0676px;font-family:'Franklin Gothic Medium';-inkscape-font-specification:'Franklin Gothic Medium, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.137766;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       x="440.13208"
+       y="392.39539"
+       id="text6-1-5"><tspan
+         id="tspan6-8-4"
+         x="440.13208"
+         y="392.39539"
+         style="font-size:29.3333px;line-height:28.0676px;text-align:end;text-anchor:end;stroke-width:0.137766;stroke-dasharray:none">Détection et floutage</tspan><tspan
+         x="440.13208"
+         y="420.46298"
+         style="font-size:29.3333px;line-height:28.0676px;text-align:end;text-anchor:end;stroke-width:0.137766;stroke-dasharray:none"
+         id="tspan7-3">automatique</tspan></text>
+    <path
+       style="fill:url(#grad-panel);fill-opacity:1;fill-rule:evenodd;stroke:#00a6d9;stroke-width:1.6317;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       id="rect5-22"
+       width="290.72034"
+       height="87.3936"
+       x="163.52402"
+       y="178.04688"
+       d="m 243.59375,178.04687 h 210.6506 v 87.39361 H 163.52402 v -7.32387 a 80.069733,80.069733 135 0 1 80.06973,-80.06974 z"
+       transform="matrix(-0.9998812,0,0,0.97523202,1330.9049,4.3302893)" />
+    <rect
+       style="fill:url(#grad-panel);fill-opacity:1;fill-rule:evenodd;stroke:#00a6d9;stroke-width:1.61127;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       id="rect5-1-1"
+       width="290.68579"
+       height="85.229042"
+       x="-1167.4004"
+       y="267.4884"
+       transform="scale(-1,1)" />
+    <path
+       style="fill:url(#grad-panel);fill-opacity:1;fill-rule:evenodd;stroke:#00a6d9;stroke-width:1.6317;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       id="rect5-2-6"
+       width="290.72034"
+       height="87.3936"
+       x="163.52402"
+       y="353.30179"
+       d="m 163.52402,353.30179 h 290.72033 v 87.3936 H 250.91762 a 87.3936,87.3936 45 0 1 -87.3936,-87.3936 z"
+       transform="matrix(-0.9998812,0,0,0.97523202,1330.9049,12.458312)" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:36.8142px;line-height:42.8899px;font-family:'Franklin Gothic Medium';-inkscape-font-specification:'Franklin Gothic Medium, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.2;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       x="308.74039"
+       y="232.63452"
+       id="text6"><tspan
+         id="tspan6"
+         x="308.74039"
+         y="232.63452"
+         style="stroke-width:0.2;stroke-dasharray:none">OUVRIR</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:36.8142px;line-height:42.8899px;font-family:'Franklin Gothic Medium';-inkscape-font-specification:'Franklin Gothic Medium, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.2;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       x="1021.563"
+       y="411.89246"
+       id="text6-9"><tspan
+         id="tspan6-86"
+         x="1021.563"
+         y="411.89246"
+         style="stroke-width:0.2;stroke-dasharray:none">ENREGISTRER</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:29.3333px;line-height:28.0676px;font-family:'Franklin Gothic Medium';-inkscape-font-specification:'Franklin Gothic Medium, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.137766;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       x="444.77988"
+       y="303.46735"
+       id="text6-1"><tspan
+         id="tspan6-8"
+         x="444.77988"
+         y="303.46735"
+         style="font-size:29.3333px;line-height:28.0676px;text-align:end;text-anchor:end;stroke-width:0.137766;stroke-dasharray:none">Détection des visages</tspan><tspan
+         x="444.77988"
+         y="331.53494"
+         style="font-size:29.3333px;line-height:28.0676px;text-align:end;text-anchor:end;stroke-width:0.137766;stroke-dasharray:none"
+         id="tspan7">automatique</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:29.3333px;line-height:28.0676px;font-family:'Franklin Gothic Medium';-inkscape-font-specification:'Franklin Gothic Medium, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.137766;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       x="923.00024"
+       y="227.91515"
+       id="text6-1-4"><tspan
+         x="923.00024"
+         y="227.91515"
+         style="font-size:29.3333px;line-height:28.0676px;text-align:start;text-anchor:start;stroke-width:0.137766;stroke-dasharray:none"
+         id="tspan7-1">Annuler  (ctrl+z)</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:29.3333px;line-height:28.0676px;font-family:'Franklin Gothic Medium';-inkscape-font-specification:'Franklin Gothic Medium, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.137766;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       x="920.95209"
+       y="319.89264"
+       id="text6-1-4-2"><tspan
+         x="920.95209"
+         y="319.89264"
+         style="font-size:29.3333px;line-height:28.0676px;text-align:start;text-anchor:start;stroke-width:0.137766;stroke-dasharray:none"
+         id="tspan7-1-7">Effacer</tspan></text>
+  </g>
+</svg>

@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'none';
+             script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+             style-src 'unsafe-inline';
+             img-src 'self' data: blob:;
+             connect-src https://cdn.jsdelivr.net;
+             worker-src 'none';
+             form-action 'none';
+             base-uri 'none';">
+  <title>Face-Efface · Photo — XiPiNOCODE</title>
+  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+  <script src="i18n.js"></script>
+  <style>
+    :root {
+      --sidebar-w: 20vw;
+      --violet:   #200034;
+      --blue:     #1383ae;
+      --cyan:     #00a6d9;
+      --cyan-lt:  #b8e8f8;
+      --bg:       #0d0d18;
+      --surface:  #130920;
+      --surface2: #1c1134;
+      --border:   rgba(0, 166, 217, 0.18);
+      --border2:  rgba(0, 166, 217, 0.42);
+      --text:     #ffffff;
+      --dim:      rgba(184, 232, 248, 0.55);
+      --glow:     0 0 14px rgba(0, 166, 217, 0.35);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--bg);
+      display: flex;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    /* ── FENÊTRE PLEIN ÉCRAN ── */
+    #app {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      background: var(--bg);
+      overflow: hidden;
+    }
+
+    /* ── SIDEBAR ── */
+    aside {
+      width: var(--sidebar-w);
+      min-width: 190px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    /* ── LOGO BLOC ── */
+    #logo-bloc {
+      padding: 14px 14px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .app-title {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      background: linear-gradient(to right, #ffffff 0%, #00a6d9 60%, #1383ae 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .app-title-main {
+      font-size: 1.15rem;
+      font-weight: 900;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+    .app-title-by {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    #logo-img {
+      width: 100%;
+      display: block;
+      border-radius: 6px;
+    }
+
+    /* Badge app name */
+    .app-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 10px;
+      background: linear-gradient(135deg, #ffffff 0%, #1383ae 40%, #00a6d9 65%, #200034 100%);
+      color: #ffffff;
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 0.68rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      width: fit-content;
+    }
+    .app-badge svg { flex-shrink: 0; }
+
+    /* Phrase vie privée sous le badge */
+    .badge-tagline {
+      font-size: 0.52rem;
+      font-weight: 600;
+      color: var(--dim);
+      line-height: 1.5;
+      margin-top: 7px;
+      font-style: italic;
+      opacity: 0.75;
+    }
+
+    /* ── BLOCS SIDEBAR ── */
+    .sb-block {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sb-label {
+      font-size: 0.52rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--cyan);
+      margin-bottom: 2px;
+    }
+
+    /* ── MODES ── */
+    .mode-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      padding: 8px 9px;
+      border-radius: 7px;
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      transition: all 0.12s;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+    }
+    .mode-item:hover { background: rgba(0,166,217,0.07); border-color: var(--border); }
+    .mode-item.active {
+      background: rgba(0,166,217,0.1);
+      border-color: var(--border2);
+    }
+    .mode-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      border: 2px solid var(--dim);
+      flex-shrink: 0;
+      margin-top: 3px;
+      transition: all 0.12s;
+    }
+    .mode-item.active .mode-dot {
+      background: var(--cyan);
+      border-color: var(--cyan);
+      box-shadow: 0 0 6px rgba(0,166,217,0.6);
+    }
+    .mode-name {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.2;
+    }
+    .mode-desc {
+      font-size: 0.58rem;
+      color: var(--dim);
+      line-height: 1.5;
+      margin-top: 2px;
+    }
+
+    /* ── BOUTONS SIDEBAR (panel ajustement) ── */
+    .btn {
+      width: 100%;
+      padding: 9px 10px;
+      border-radius: 7px;
+      font-weight: 700;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.12s;
+      color: var(--text);
+    }
+    .btn:active:not(:disabled) { transform: scale(0.96); }
+    .btn:disabled { opacity: 0.22; cursor: not-allowed; }
+    .btn-cyan { background: var(--cyan); color: var(--violet); font-weight: 900; }
+    .btn-cyan:hover:not(:disabled) { background: #10baed; box-shadow: var(--glow); }
+    .btn-outline { background: transparent; color: var(--cyan-lt); border: 1.5px solid var(--border2); }
+    .btn-outline:hover:not(:disabled) { border-color: var(--cyan); background: rgba(0,166,217,0.1); }
+
+    /* ── COLONNE ACTIONS (droite) ── */
+    #actions {
+      width: 90px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 10px 7px;
+      overflow-y: auto;
+    }
+    .tbtn {
+      width: 100%;
+      padding: 9px 4px;
+      border-radius: 7px;
+      font-weight: 700;
+      font-size: 0.55rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.12s;
+      color: var(--text);
+    }
+    .tbtn:active:not(:disabled) { transform: scale(0.96); }
+    .tbtn:disabled { opacity: 0.22; cursor: not-allowed; }
+    .tbtn-primary { background: var(--cyan); color: var(--violet); font-weight: 900; }
+    .tbtn-primary:hover:not(:disabled) { background: #10baed; box-shadow: var(--glow); }
+    .tbtn-outline { background: transparent; color: var(--cyan-lt); border: 1.5px solid var(--border2); }
+    .tbtn-outline:hover:not(:disabled) { border-color: var(--cyan); background: rgba(0,166,217,0.1); }
+    .tbtn-ghost { background: transparent; color: var(--dim); border: 1.5px solid var(--border); }
+    .tbtn-ghost:hover:not(:disabled) { color: #fff; border-color: var(--border2); }
+    .tb-sep { border: none; border-top: 1px solid var(--border); margin: 2px 0; }
+    /* Panel ajustement dans toolbar */
+    #block-adjust {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.05);
+      border: 1.5px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      padding: 6px 10px;
+    }
+    #block-adjust .adj-label { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #fff; }
+    #block-adjust #pixel-val { font-size: 0.85rem; font-weight: 900; color: #fff; min-width: 22px; text-align: center; }
+    #block-adjust .xn-range { width: 70px; }
+
+    /* ── CONSEILS ── */
+    .conseils-block {
+      margin-top: auto;
+      padding: 12px 14px;
+      border-top: 1px solid var(--border);
+    }
+    .conseils-title {
+      font-size: 0.58rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--cyan);
+      margin-bottom: 7px;
+    }
+    .conseils-text {
+      font-size: 0.62rem;
+      color: rgba(184,232,248,0.7);
+      line-height: 1.65;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--dim);
+      border: 1.5px solid var(--border);
+      font-size: 0.63rem;
+    }
+    .btn-ghost:hover:not(:disabled) { color: #fff; border-color: var(--border2); }
+
+    /* ── PANEL AJUSTEMENT ── */
+    #panel-adjust {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      background: rgba(255,255,255,0.06);
+      border: 1.5px solid rgba(255,255,255,0.18);
+      border-radius: 8px;
+      padding: 11px 10px;
+    }
+
+    .adj-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .adj-label {
+      font-size: 0.63rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #ffffff;
+    }
+    #pixel-val {
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: #ffffff;
+    }
+    .zone-count {
+      font-size: 0.57rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--cyan);
+    }
+    .xn-range {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 3px;
+      border-radius: 2px;
+      background: #3f4e67;
+      outline: none;
+      cursor: ew-resize;
+    }
+    .xn-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: #3f4e67;
+      box-shadow: 0 0 4px rgba(63,78,103,0.5);
+      cursor: ew-resize;
+    }
+
+    /* ── BOUTON SUPPRIMER zone ── */
+    .face-box .del-btn {
+      position: absolute;
+      top: -7px; right: -7px;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: rgba(255,95,87,0.85);
+      border: none;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      color: #fff;
+      font-weight: 900;
+      z-index: 20;
+      line-height: 1;
+    }
+    .face-box:hover .del-btn { display: flex; }
+
+    .sep { border: none; border-top: 1px solid var(--border); }
+
+    /* ── TOOLTIP i ── */
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 14px;
+      margin-top: auto;
+      border-top: 1px solid var(--border);
+    }
+    .info-tip {
+      position: relative;
+      width: 15px; height: 15px;
+      border-radius: 50%;
+      border: 1.5px solid var(--cyan-lt);
+      font-size: 0.55rem;
+      font-weight: 900;
+      color: var(--cyan-lt);
+      cursor: default;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.6;
+    }
+    .info-tip:hover { opacity: 1; }
+    .info-tip:hover .tip-box { display: block; }
+    .tip-box {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 0;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 10px 12px;
+      width: 185px;
+      font-size: 0.62rem;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.65;
+      z-index: 500;
+      pointer-events: none;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .tip-text {
+      font-size: 0.58rem;
+      color: var(--cyan-lt);
+      opacity: 0.6;
+      line-height: 1.4;
+    }
+
+    /* ── HEADER PLEINE LARGEUR ── */
+    #app-header {
+      flex-shrink: 0;
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: clamp(8px, 1.5vw, 20px);
+      padding: 6px clamp(12px, 2vw, 28px);
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .app-header-title {
+      font-size: clamp(0.7rem, 1.4vw, 1rem);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .app-header-sub {
+      font-size: clamp(0.45rem, 0.9vw, 0.65rem);
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #7a90aa;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .app-header-by {
+      font-size: clamp(0.7rem, 1.4vw, 1rem);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    /* ── CONSOLE FLOTTANTE ── */
+    #viewport {
+      flex: 1;
+      min-height: 0;
+      background: #07070f;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+    #viewport.drag-over #canvas-area { outline: 2px dashed var(--cyan); outline-offset: -4px; }
+
+    /* ── CONSOLE FLOTTANTE ── */
+    #console-wrap {
+      align-self: center;
+      flex-shrink: 0;
+      margin: 8px auto 0;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 5px;
+      filter: drop-shadow(0 4px 20px rgba(63,78,103,0.3));
+    }
+    #btn-pro-float {
+      align-self: center;
+      flex-shrink: 0;
+      background: none;
+      border: 1px solid var(--border2);
+      color: var(--cyan);
+      font-size: 0.46rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      padding: 4px 14px;
+      border-radius: 99px;
+      transition: background 0.12s, color 0.12s;
+      margin: 3px auto 0;
+    }
+    #btn-pro-float:hover { background: rgba(0,166,217,0.12); color: #fff; }
+    .con-title {
+      text-align: center;
+      font-size: 1rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #3f4e67;
+      pointer-events: none;
+      user-select: none;
+      line-height: 1;
+    }
+    .con-row {
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      gap: 4px;
+      height: 114px;
+    }
+    .con-subtitle {
+      text-align: center;
+      font-size: 0.52rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #3f4e67;
+      pointer-events: none;
+      user-select: none;
+      line-height: 1;
+      opacity: 0.75;
+    }
+    /* Colonnes gauche et droite */
+    .con-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      width: 215px;
+    }
+    /* Boutons de la console */
+    .cbtn {
+      flex: 1;
+      border: 1px solid #3f4e67;
+      cursor: pointer;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px;
+      transition: background 0.12s;
+    }
+    .cbtn:hover:not(:disabled) { background: rgba(63,78,103,0.12); }
+    .cbtn:active:not(:disabled) { background: rgba(63,78,103,0.22); }
+    .cbtn:disabled { cursor: not-allowed; opacity: 0.38; }
+    .cbtn svg { width: 17px; height: 17px; stroke: #3f4e67; fill: none; pointer-events: none; flex-shrink: 0; }
+    .cbtn span.clabel { font-size: 0.5rem; font-weight: 800; letter-spacing: 0.03em; text-transform: uppercase; color: #3f4e67; pointer-events: none; line-height: 1.35; text-align: left; flex: 1; }
+    /* Couleurs des rangées (fidèles au SVG) */
+    .cbtn-r1 { background: #f5fbfc; }
+    .cbtn-r2 { background: #ddf9fc; }
+    .cbtn-r3 { background: #b3fafc; }
+    /* Arrondis extérieurs */
+    .con-panel:first-child .cbtn-r1 { border-radius: 10px 0 0 0; }
+    .con-panel:first-child .cbtn-r3 { border-radius: 0 0 0 10px; }
+    .con-panel:last-child  .cbtn-r1 { border-radius: 0 10px 0 0; }
+    .con-panel:last-child  .cbtn-r3 { border-radius: 0 0 10px 0; }
+    /* Logo central — hauteur = hauteur console, largeur auto */
+    #con-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      flex-shrink: 0;
+    }
+    #console-logo-inner {
+      height: 114px;
+      width: auto;
+      display: block;
+      pointer-events: none;
+    }
+    /* Panel ajustement dans console (contextuel) */
+    #block-adjust {
+      position: absolute;
+      inset: 0;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: space-between;
+      gap: 0;
+      padding: 7px 8px 8px;
+      background: #f1f6f9;
+    }
+    #block-adjust .adj-top { display: flex; flex-direction: column; gap: 3px; }
+    #block-adjust .zone-count { font-size: 0.52rem; color: #3f4e67; font-weight: 800; text-align: center; }
+    #block-adjust .adj-row { display: flex; justify-content: space-between; }
+    #block-adjust .adj-label { font-size: 0.52rem; font-weight: 800; text-transform: uppercase; color: #3f4e67; }
+    #block-adjust #pixel-val { font-size: 0.75rem; font-weight: 900; color: #3f4e67; }
+    #block-adjust .xn-range { width: 100%; }
+    #block-adjust .adj-btns { display: flex; flex-direction: column; gap: 3px; }
+    #block-adjust .btn { font-size: 0.5rem; padding: 4px; border: 1px solid #3f4e67; background: #ddf9fc; color: #3f4e67; font-weight: 800; border-radius: 4px; cursor: pointer; }
+    #block-adjust .btn:hover { background: #b3fafc; }
+
+    /* Zone canvas */
+    #canvas-area {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+      background: #07070f;
+    }
+
+    #canvas-wrap {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    canvas {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+      cursor: crosshair;
+    }
+
+    #markers {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .face-box {
+      position: absolute;
+      border: 2px solid var(--blue);
+      background: rgba(19,131,174,0.05);
+      cursor: pointer;
+      pointer-events: auto;
+      z-index: 10;
+      overflow: visible;
+    }
+    .face-box:hover { border-color: var(--cyan); }
+    .face-box.active {
+      border-color: #ff6a00;
+      border-width: 3px;
+      background: rgba(255,106,0,0.10);
+      box-shadow: 0 0 0 1px #ff6a00, 0 0 10px rgba(255,106,0,0.35);
+    }
+    .face-box .pcanvas {
+      width: 100%; height: 100%;
+      display: block;
+      image-rendering: pixelated;
+      pointer-events: none;
+    }
+
+    #sel-rect {
+      position: absolute;
+      border: 1.5px dashed var(--cyan);
+      background: rgba(0,166,217,0.06);
+      pointer-events: none;
+      display: none;
+      z-index: 50;
+    }
+
+    #empty-msg {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      pointer-events: none;
+    }
+    #empty-msg svg { width: 38px; opacity: 0.2; stroke: var(--blue); }
+    #empty-msg p {
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--cyan-lt);
+      opacity: 0.25;
+    }
+
+    /* ── FOOTER ── */
+    #footer {
+      position: fixed;
+      bottom: 0;
+      left: var(--sidebar-w);
+      right: 0;
+      background: rgba(13,13,24,0.92);
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      z-index: 300;
+      backdrop-filter: blur(6px);
+    }
+    #footer-pro {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 0 4px;
+      border-bottom: 1px solid var(--border);
+    }
+    #footer-links {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      height: 26px;
+    }
+    .fbtn {
+      background: none;
+      border: none;
+      color: var(--dim);
+      font-size: 0.46rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      padding: 3px 8px;
+      border-radius: 3px;
+      transition: color 0.12s, background 0.12s;
+      white-space: nowrap;
+    }
+    .fbtn:hover { color: #fff; background: rgba(0,166,217,0.1); }
+    .fbtn-pro { color: var(--cyan); }
+    .fbtn-tipeee { color: #f5a623; text-decoration: none; }
+    .fbtn-tipeee:hover { color: #ffc55a; background: rgba(245,166,35,0.1); }
+    .fbtn-sep { color: var(--border2); font-size: 0.5rem; pointer-events: none; padding: 0; }
+
+    /* ── SÉLECTEUR LANGUE (sidebar) ── */
+    #lang-selector {
+      width: 100%;
+      padding: 10px 14px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    #lang-btn {
+      width: 100%;
+      background: rgba(0,166,217,0.08);
+      border: 1.5px solid var(--border2);
+      color: var(--cyan-lt);
+      font-size: 0.62rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      padding: 7px 10px;
+      border-radius: 7px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    #lang-btn:hover { background: rgba(0,166,217,0.15); border-color: var(--cyan); color: #fff; }
+    #lang-current-wrap { display: flex; align-items: center; gap: 5px; }
+    #lang-name {
+      font-size: 0.54rem;
+      font-weight: 600;
+      color: var(--dim);
+      text-transform: none;
+      letter-spacing: 0.02em;
+    }
+    #lang-menu {
+      display: none;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 4px;
+      margin-top: 6px;
+    }
+    #lang-menu.open { display: block; }
+    #lang-menu button {
+      display: block; width: 100%; background: none; border: none;
+      color: var(--dim); font-size: 0.65rem; font-weight: 700;
+      text-align: left; padding: 6px 10px; border-radius: 5px; cursor: pointer;
+      letter-spacing: 0.04em;
+    }
+    #lang-menu button:hover { background: rgba(0,166,217,0.12); color: #fff; }
+
+    /* ── BOUTON FLOTTANT TIPEEE ── */
+    #btn-tipeee-float {
+      position: fixed;
+      left: var(--sidebar-w);
+      right: 0;
+      bottom: 34px;
+      display: flex;
+      justify-content: center;
+      pointer-events: none;
+      z-index: 290;
+    }
+    #btn-tipeee-float a {
+      pointer-events: auto;
+      text-decoration: none;
+      filter: drop-shadow(0 4px 12px rgba(245,166,35,0.5));
+      transition: filter 0.12s, transform 0.12s;
+    }
+    #btn-tipeee-float a:hover {
+      filter: drop-shadow(0 6px 18px rgba(245,166,35,0.75));
+      transform: translateY(-2px);
+    }
+
+    /* ── MODALES ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      padding: 28px 30px;
+      max-width: 520px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    .modal-box h2 {
+      font-size: 0.85rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--cyan);
+      margin-bottom: 16px;
+    }
+    .modal-box p, .modal-box li {
+      font-size: 0.68rem;
+      color: rgba(184,232,248,0.8);
+      line-height: 1.75;
+      margin-bottom: 8px;
+    }
+    .modal-box strong { color: #fff; }
+    .modal-close {
+      position: absolute;
+      top: 12px; right: 14px;
+      background: none;
+      border: none;
+      color: var(--dim);
+      font-size: 1rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .modal-close:hover { color: #fff; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ── SIDEBAR ── -->
+  <aside>
+
+    <!-- LOGO -->
+    <div id="logo-bloc">
+      <img id="logo-img" src="logo.png" alt="XiPiNOCODE">
+    </div>
+
+    <!-- SÉLECTEUR LANGUE -->
+    <div id="lang-selector">
+      <button id="lang-btn" onclick="toggleLangMenu()">
+        <span id="lang-current-wrap"><span>🌐</span><span id="lang-current">FR</span></span>
+        <span id="lang-name">Français</span>
+      </button>
+      <div id="lang-menu">
+        <button onclick="setLang('fr')">🇫🇷 Français</button>
+        <button onclick="setLang('en')">🇬🇧 English</button>
+        <button onclick="setLang('es')">🇪🇸 Español</button>
+        <button onclick="setLang('it')">🇮🇹 Italiano</button>
+        <button onclick="setLang('de')">🇩🇪 Deutsch</button>
+        <button onclick="setLang('pt')">🇵🇹 Português</button>
+      </div>
+    </div>
+
+    <!-- DESCRIPTION DES 3 MODES -->
+    <div class="sb-block">
+      <div class="sb-label" data-i18n="modes_title">Les 3 modes</div>
+      <p style="font-size:0.72rem; color:rgba(184,232,248,0.85); line-height:1.75;" data-i18n-html="modes_desc">
+        <span style="color:#fff; font-weight:800;">Mode 1 — Manuel :</span> tracez un rectangle sur la photo pour définir une zone à flouter. <span style="color:var(--cyan);">Entrée</span> pour appliquer, <span style="color:var(--cyan);">Échap</span> pour désélectionner.<br><br>
+        <span style="color:#fff; font-weight:800;">Mode 2 — IA Détection :</span> l'IA détecte les visages et pose les cadres. Cliquez sur ceux que vous voulez flouter pour les sélectionner, la croix rouge pour en supprimer un. Ajustez l'intensité puis appliquez.<br><br>
+        <span style="color:var(--dim);">Les cadres <span style="color:#ff6a00; font-weight:800;">orange</span> sont sélectionnés (seront floutés), les cadres <span style="color:var(--cyan);">bleus</span> sont inactifs. Cliquez pour basculer.</span><br><br>
+        <span style="color:var(--dim);">Dans les modes 1 et 2, une <span style="color:var(--cyan);">molette de réglage</span> apparaît au centre de la console dès qu'une zone est sélectionnée — elle permet d'ajuster l'intensité du floutage avant d'appliquer.</span><br><br>
+        <span style="color:#fff; font-weight:800;">Mode 3 — IA Floutage complet :</span> l'IA détecte et floute tous les visages en un seul clic.
+      </p>
+      <p style="font-size:0.58rem; color:var(--cyan); font-weight:800; letter-spacing:0.04em; margin-top:2px;" data-i18n="manual_always">
+        ✦ Le mode Manuel est toujours actif
+      </p>
+    </div>
+
+    <!-- CONSEILS -->
+    <div class="conseils-block">
+      <div class="conseils-title" data-i18n="tips_title">💡 Conseils d'organisation</div>
+      <p class="conseils-text" data-i18n-html="tips_text">
+        Avant de commencer, créez deux dossiers sur votre ordinateur :<br><br>
+        <strong style="color:#fff;">📁 Photos originales</strong> — vos photos telles qu'elles sont.<br>
+        <strong style="color:#fff;">📁 Photos floutées</strong> — les photos une fois traitées.<br><br>
+        Cela évite d'écraser vos originaux par accident et simplifie votre workflow.
+      </p>
+    </div>
+
+    <!-- INFO CONFIDENTIALITÉ -->
+    <div class="info-row">
+      <div class="info-tip">
+        i
+        <div class="tip-box" data-i18n-html="privacy_tip">
+          Votre photo est traitée directement dans votre navigateur, sur votre ordinateur.<br><br>
+          Elle n'est jamais envoyée sur internet ni stockée sur un serveur. Même quand l'application est en ligne, vos images restent chez vous.
+        </div>
+      </div>
+      <span class="tip-text" data-i18n="privacy_label">Vos photos restent sur votre appareil</span>
+    </div>
+
+  </aside>
+
+  <!-- ── VIEWPORT ── -->
+  <section id="viewport">
+
+    <!-- HEADER PLEINE LARGEUR -->
+    <div id="app-header">
+      <span class="app-header-title">Face-Efface · Photo</span>
+      <span class="app-header-sub" data-i18n="header_sub">Protection de la vie privée · Floutage automatique sur photo ·</span>
+      <span class="app-header-by">Par XiPiNoCoDe</span>
+    </div>
+
+    <!-- CONSOLE DE CONTRÔLE FLOTTANTE -->
+    <div id="console-wrap">
+
+      <div class="con-row">
+
+      <!-- GAUCHE : texte à gauche, icône à droite -->
+      <div class="con-panel">
+        <input type="file" id="upload" accept="image/*" style="display:none">
+        <label for="upload" class="cbtn cbtn-r1" style="cursor:pointer;" data-i18n-title="btn_open" title="Ouvrir une photo">
+          <span class="clabel" data-i18n="btn_open">Ouvrir une photo</span>
+          <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        </label>
+        <button id="btn-detect" class="cbtn cbtn-r2" disabled onclick="scanFaces()" data-i18n-title="btn_detect" title="Détection des visages automatique">
+          <span class="clabel"><span class="btn-label" data-i18n="btn_detect">Détection des visages automatique</span></span>
+          <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/></svg>
+        </button>
+        <button id="btn-auto" class="cbtn cbtn-r3" disabled onclick="autoBlur()" data-i18n-title="btn_auto" title="Détection et floutage automatique">
+          <span class="clabel"><span class="btn-label" data-i18n="btn_auto">Détection et floutage automatique</span></span>
+          <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </button>
+      </div>
+
+      <!-- CENTRE : logo carré (même hauteur que les colonnes) -->
+      <div id="con-logo">
+        <img id="console-logo-inner" src="face-efface-photo.png" alt="Face-Efface Photo">
+        <div id="block-adjust" style="display:none;">
+          <div class="adj-top">
+            <div class="zone-count" id="zone-label">1 zone</div>
+            <div class="adj-row">
+              <span class="adj-label">Pixel</span>
+              <span id="pixel-val">20</span>
+            </div>
+            <input type="range" class="xn-range" id="pixel-size" min="4" max="80" value="20" oninput="onSlider()">
+          </div>
+          <div class="adj-btns">
+            <button class="btn" onclick="applyBlur()" data-i18n="btn_apply">Appliquer</button>
+            <button class="btn" onclick="clearSelection()" data-i18n="btn_deselect">✕ Désélectionner</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- DROITE : icône à gauche, texte à droite -->
+      <div class="con-panel">
+        <button id="btn-undo" class="cbtn cbtn-r1" disabled onclick="undo()" data-i18n-title="btn_undo_title" title="Annuler (Ctrl+Z)">
+          <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+          <span class="clabel" data-i18n="btn_undo">Annuler  Ctrl+Z</span>
+        </button>
+        <button class="cbtn cbtn-r2" onclick="resetAll()" data-i18n-title="btn_reset" title="Effacer">
+          <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.11"/></svg>
+          <span class="clabel" data-i18n="btn_reset">Effacer</span>
+        </button>
+        <button id="btn-save" class="cbtn cbtn-r3" disabled onclick="saveImage()" data-i18n-title="btn_save" title="Enregistrer">
+          <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <span class="clabel" data-i18n="btn_save">Enregistrer</span>
+        </button>
+      </div>
+
+      </div><!-- fin .con-row -->
+
+
+    </div>
+
+    <!-- ZONE CANVAS -->
+    <div id="canvas-area">
+      <div id="canvas-wrap">
+        <div id="markers"></div>
+        <div id="sel-rect"></div>
+        <canvas id="canvas"></canvas>
+      </div>
+      <div id="empty-msg">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21 15 16 10 5 21"/>
+        </svg>
+        <p data-i18n="drop_here">Glissez une image ici</p>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<!-- ── FOOTER ── -->
+<div id="footer">
+  <div id="footer-links">
+    <button class="fbtn" onclick="openModal('modal-mentions')" data-i18n="footer_legal">Mentions légales</button>
+    <span class="fbtn-sep">·</span>
+    <button class="fbtn" onclick="openModal('modal-rgpd')" data-i18n="footer_privacy">Confidentialité & RGPD</button>
+    <span class="fbtn-sep">·</span>
+    <button class="fbtn" onclick="openModal('modal-cgu')" data-i18n="footer_terms">CGU</button>
+    <span class="fbtn-sep">·</span>
+    <button class="fbtn" onclick="openModal('modal-contact')" data-i18n="footer_contact">Contact</button>
+    <span class="fbtn-sep">·</span>
+    <button class="fbtn" onclick="openModal('modal-apropos')" data-i18n="footer_about">À propos</button>
+  </div>
+</div>
+
+<!-- ── MODALES ── -->
+
+<div id="modal-mentions" class="modal-overlay" onclick="closeModal(this)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal(document.getElementById('modal-mentions'))">✕</button>
+    <h2>Mentions légales</h2>
+    <p><strong>Éditeur :</strong> Molinari Bruno — XiPiNOCODE<br>02 rue des Charrons, 63590 Cunlhat, France</p>
+    <p><strong>Contact :</strong> xipilom@live.fr</p>
+    <p><strong>Hébergeur :</strong> GitHub Pages — GitHub Inc., 88 Colin P Kelly Jr St, San Francisco, CA 94107, USA</p>
+    <p><strong>Directeur de publication :</strong> Molinari Bruno</p>
+    <p>Application développée et maintenue par Molinari Bruno / XiPiNOCODE. Tous droits réservés.</p>
+  </div>
+</div>
+
+<div id="modal-rgpd" class="modal-overlay" onclick="closeModal(this)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal(document.getElementById('modal-rgpd'))">✕</button>
+    <h2>Confidentialité & RGPD</h2>
+    <p><strong>Aucune donnée personnelle n'est collectée.</strong></p>
+    <p>Face-Efface · Photo fonctionne intégralement dans votre navigateur, sur votre appareil. Vos images ne quittent jamais votre ordinateur et ne sont transmises à aucun serveur.</p>
+    <p>L'application ne dépose aucun cookie, n'utilise aucun traceur, et ne collecte aucune information vous concernant.</p>
+    <p>Conformément au Règlement Général sur la Protection des Données (RGPD — UE 2016/679), vous disposez d'un droit d'accès, de rectification et d'effacement de vos données. En l'absence de toute collecte, ce droit s'exerce sans objet.</p>
+    <p>Contact : Molinari Bruno — xipilom@live.fr</p>
+  </div>
+</div>
+
+<div id="modal-cgu" class="modal-overlay" onclick="closeModal(this)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal(document.getElementById('modal-cgu'))">✕</button>
+    <h2>Conditions générales d'utilisation</h2>
+    <p>L'utilisation de Face-Efface · Photo est libre et gratuite. En l'utilisant, vous acceptez les présentes conditions.</p>
+    <p><strong>Utilisation :</strong> L'application est fournie à titre personnel. Tout usage à des fins illégales, notamment le traitement d'images sans le consentement des personnes représentées, est strictement interdit.</p>
+    <p><strong>Responsabilité :</strong> XiPiNOCODE ne saurait être tenu responsable des usages qui seraient faits de l'application, ni de la qualité des résultats obtenus.</p>
+    <p><strong>Disponibilité :</strong> L'application est fournie en l'état, sans garantie de disponibilité continue.</p>
+    <p><strong>Propriété intellectuelle :</strong> L'ensemble du code, du design et des visuels de l'application sont la propriété de XiPiNOCODE. Reproduction interdite sans autorisation.</p>
+    <p>La détection de visages est assurée par la bibliothèque open source <strong>face-api.js</strong> (MIT License) — <em>@vladmandic/face-api</em>.</p>
+  </div>
+</div>
+
+<div id="modal-contact" class="modal-overlay" onclick="closeModal(this)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal(document.getElementById('modal-contact'))">✕</button>
+    <h2>Contact</h2>
+    <p>Pour toute question, signalement de bug, suggestion ou demande de partenariat :</p>
+    <p><strong>Molinari Bruno — XiPiNOCODE</strong><br>02 rue des Charrons, 63590 Cunlhat, France</p>
+    <p><strong>E-mail :</strong> xipilom@live.fr</p>
+    <p><strong>Site :</strong> <em>(à venir)</em></p>
+    <p>Nous nous engageons à répondre dans un délai raisonnable.</p>
+  </div>
+</div>
+
+<div id="modal-apropos" class="modal-overlay" onclick="closeModal(this)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal(document.getElementById('modal-apropos'))">✕</button>
+    <h2>À propos</h2>
+    <p><strong>Face-Efface · Photo</strong> — version 1.0</p>
+    <p>Application de floutage de visages 100 % locale, développée par <strong>XiPiNOCODE</strong>.</p>
+    <p>Vos photos ne quittent jamais votre appareil. Aucune connexion requise pour le floutage manuel.</p>
+    <p><strong>Technologies :</strong></p>
+    <p>— Détection IA : <em>face-api.js / @vladmandic</em> (MIT) via CDN jsDelivr<br>
+       — Interface : HTML · CSS · JavaScript vanilla<br>
+       — Hébergement : GitHub Pages</p>
+    <p>© Molinari Bruno / XiPiNOCODE — Tous droits réservés.</p>
+  </div>
+</div>
+
+<div id="modal-pro" class="modal-overlay" onclick="closeModal(this)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal(document.getElementById('modal-pro'))">✕</button>
+    <a href="https://fr.tipeee.com/xipinocode/" target="_blank" rel="noopener">
+      <img src="tipeee_tip_btn_anim.gif" alt="Soutenir sur Tipeee" style="width:100%;display:block;border-radius:8px;">
+    </a>
+  </div>
+</div>
+
+<div id="btn-tipeee-float">
+  <a href="https://fr.tipeee.com/xipinocode/" target="_blank" rel="noopener" title="Soutenez XiPiNOCODE">
+    <img src="tipeee_tip_btn_anim.gif" alt="Soutenir sur Tipeee" style="height:65px;display:block;border-radius:10px;">
+  </a>
+</div>
+
+<script>
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(el) { el.classList.remove('open'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open')); });
+</script>
+
+<script src="app.js"></script>
+</body>
+</html>
