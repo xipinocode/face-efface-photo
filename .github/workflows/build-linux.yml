@@ -1,0 +1,75 @@
+name: Build Linux
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Installer dépendances système Linux
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libgtk-3-dev \
+            libssl-dev \
+            libayatana-appindicator3-dev
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Installer Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: photo/src-tauri
+
+      - name: Installer dépendances npm
+        working-directory: photo
+        run: npm install
+
+      - name: Build Tauri Linux
+        working-directory: photo
+        run: npx tauri build --target x86_64-unknown-linux-gnu
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ""
+
+      - name: Upload AppImage
+        uses: actions/upload-artifact@v4
+        with:
+          name: face-efface-photo-linux-appimage
+          path: photo/src-tauri/target/release/bundle/appimage/*.AppImage
+
+      - name: Upload .deb
+        uses: actions/upload-artifact@v4
+        with:
+          name: face-efface-photo-linux-deb
+          path: photo/src-tauri/target/release/bundle/deb/*.deb
+
+      - name: Créer Release GitHub (si tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            photo/src-tauri/target/release/bundle/appimage/*.AppImage
+            photo/src-tauri/target/release/bundle/deb/*.deb
+          tag_name: ${{ github.ref_name }}
+          name: "Face-Efface Photo ${{ github.ref_name }}"
+          append_body: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
